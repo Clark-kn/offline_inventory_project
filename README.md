@@ -2,176 +2,277 @@
 
 **Kaliwabo Software Studio**
 
-An offline Windows desktop inventory management system for tracking products, purchasing, sales, stock movements, damaged goods and reports. It uses a local SQLite database and does not require a cloud account or hosted database for normal inventory operations.
+An offline Windows desktop application for managing inventory, purchasing, sales, stock movements, damaged goods and reports.
 
-Built with Python 3.11+, PySide6, SQLAlchemy, SQLite, Alembic, ReportLab, openpyxl and PyInstaller.
+Kaliwabo Inventory is intended for businesses that need a practical, locally operated inventory system without depending on a cloud account or hosted database for normal operations.
+
+**Version:** 1.0.0
+**Platform:** Windows
+**Application type:** Offline desktop software
+**Technology:** Python, PySide6, SQLAlchemy, SQLite
+
+---
+
+## Project Background and Attribution
+
+Kaliwabo Inventory is a rebranded and modified fork of the open-source **Offline Inventory Management System** originally created by **Sudhakar Ponugoti**.
+
+- **Original project:** [P-Sudhakar-tech/offline_inventory_project](https://github.com/P-Sudhakar-tech/offline_inventory_project)
+- **Original author:** Sudhakar Ponugoti
+- **Original licence:** MIT
+- **Kaliwabo fork:** [Clark-kn/offline_inventory_project](https://github.com/Clark-kn/offline_inventory_project)
+
+The original project provided the application foundation and existing functionality. This repository preserves that lineage and documents the additional work carried out for the Kaliwabo-branded release.
+
+### Work carried out for the Kaliwabo release
+
+The work in this fork includes:
+
+- Rebranding the application interface and Windows installer as **Kaliwabo Inventory**.
+- Introducing **Kaliwabo Software Studio** as the product publisher identity.
+- Updating installation branding while retaining the established application identity and installation directory for upgrade compatibility.
+- Refining role-based access and application permissions.
+- Enforcing saved selling-price restrictions for operators.
+- Restricting damaged-goods deletion to administrators and recording deletions in the audit log.
+- Preparing and testing a Windows installation package.
+- Running regression tests and validating the branded application through a separate Windows test account.
+
+This is a fork with additional modifications, not a claim of sole authorship of the original application.
+
+---
 
 ## Features
 
-### Master Data
-- Products: SKU, barcode, name, category, unit, selling price, reorder level, location and active/inactive status.
+### Inventory and master data
+
+- Product records with SKU, barcode, category, unit, selling price and reorder level.
 - Categories, units and locations.
-- Suppliers and customers.
-- Records referenced by transaction history can be deactivated instead of hard-deleted.
+- Supplier and customer records.
+- Active and inactive record management.
+- Purchase and stock-in transactions.
+- Sales and stock-out transactions.
+- Purchase orders.
+- Stock adjustments with mandatory reasons.
+- Damaged-goods recording and management.
+- Stock ledger with user attribution and related transaction references where available.
+- Prevention of normal stock-out transactions that would reduce stock below zero.
 
-### Inventory and Transactions
-- Purchases / Stock In with multiple product lines.
-- Sales / Stock Out with multiple product lines.
-- Purchase Orders.
-- Stock Adjustments with a mandatory reason.
-- Damaged Goods recording and management.
-- Stock Ledger with user attribution and related transaction references where available.
-- Database transactions protect multi-item stock operations from partial updates.
-- Normal stock-out operations cannot reduce stock below zero.
+### Dashboard and reporting
 
-### Dashboard and Reports
-- Dashboard indicators for active products, stock value, low-stock items, out-of-stock items and recent movements.
-- Current stock, low-stock, out-of-stock and date-ranged stock movement reports.
+- Dashboard indicators for active products, stock value and stock levels.
+- Low-stock and out-of-stock visibility.
+- Stock movement reports over selected date ranges.
 - PDF and Excel exports.
 
-### Security and User Accounts
-- Login required.
-- Passwords hashed using PBKDF2-SHA256 with per-user random salts.
-- Four roles: Admin, Manager, Operator and Viewer.
-- Authorization enforced in application services and the user interface where applicable.
-- Operators cannot override saved selling prices during sales.
-- Damaged Goods deletion is Admin-only and recorded in the Audit Log.
-- Audit records cover important authentication, user and inventory actions.
-- First-run setup creates the initial administrator account.
+### Accounts and permissions
 
-### Local Data and Backups
-- Local SQLite database.
-- Database location selected during first-run setup, outside the application installation directory.
-- Configuration stored separately from the installed application.
-- Automatic daily backups with configurable retention (default: 14 backups).
-- Manual backup and restore with database integrity checking.
-- Authorized administrators can manage database and backup locations.
-- Uninstallation preserves the database, configuration and backups.
+The application provides four user roles:
 
-### Database Migrations
-- Alembic schema migrations run automatically during application startup.
-- Fresh installations create the current schema.
-- Existing databases are upgraded through migrations rather than being recreated.
-
-### Windows Packaging
-- PyInstaller builds the application into a Windows application folder containing the executable and supporting files.
-- The application includes self-installation support.
-- Inno Setup builds a Windows setup executable for per-user installation.
-- The standard installation does not require administrator privileges.
-- Uninstallation removes the installed application while preserving user data.
-
-## Roles and Permissions
-
-| Screen / Function | Admin | Manager | Operator | Viewer |
+| Function | Admin | Manager | Operator | Viewer |
 |---|:---:|:---:|:---:|:---:|
 | Dashboard | Yes | Yes | Yes | Yes |
 | Products | Yes | Yes | Yes | Read-only |
-| Categories / Units / Locations | Yes | Yes | No | No |
-| Suppliers / Customers | Yes | Yes | No | No |
-| Purchases / Sales / Adjustments | Yes | Yes | Yes | No |
-| Purchase Orders | Yes | Yes | Yes | No |
-| Damaged Goods | Yes | Yes | Yes | No |
-| Stock Ledger | Yes | Yes | Yes | No |
+| Categories, units, locations | Yes | Yes | No | No |
+| Suppliers and customers | Yes | Yes | No | No |
+| Purchases, sales and adjustments | Yes | Yes | Yes | No |
+| Purchase orders | Yes | Yes | Yes | No |
+| Damaged goods | Yes | Yes | Yes | No |
+| Stock ledger | Yes | Yes | Yes | No |
 | Reports | Yes | Yes | Yes | No |
-| Users | Yes | No | No | No |
-| Audit Log | Yes | No | No | No |
-| Application Settings | Yes | No | No | No |
+| User management | Yes | No | No | No |
+| Audit log | Yes | No | No | No |
+| Application settings | Yes | No | No | No |
 
-Additional restrictions:
+Additional controls:
+
 - Viewer access is limited to Dashboard and read-only Products.
 - Operators cannot override saved selling prices during sales.
-- Damaged Goods deletion is Admin-only and recorded in the Audit Log.
+- Damaged-goods deletion is restricted to administrators and recorded in the Audit Log.
+- Passwords are hashed using PBKDF2-SHA256 with per-user random salts.
+- Authorization is enforced in application services and the user interface where applicable.
 
-## Getting Started — Development
+### Local data and backups
 
-Requirements:
+- Local SQLite database.
+- Database location selected during first-run setup.
+- Configuration and data are stored separately from the program installation.
+- Automatic daily backups with configurable retention.
+- Manual backup and restore with database integrity checking.
+- Existing databases are upgraded through Alembic migrations.
+- Uninstallation preserves user data and backups.
+
+### Windows installation
+
+The application is packaged using PyInstaller and distributed through an Inno Setup installer.
+
+The standard installation is per-user and does not normally require administrator privileges. The established installation identity and directory are retained to support in-place upgrades.
+
+---
+
+## Technology Stack
+
+| Component | Technology |
+|---|---|
+| Programming language | Python 3.11+ |
+| Desktop interface | PySide6 |
+| Database | SQLite |
+| ORM | SQLAlchemy |
+| Database migrations | Alembic |
+| PDF reports | ReportLab |
+| Spreadsheet exports | openpyxl |
+| Application packaging | PyInstaller |
+| Windows installer | Inno Setup |
+| Automated tests | pytest |
+
+---
+
+## Installation
+
+The Windows setup executable is distributed separately from this source repository unless a release asset is published.
+
+1. Obtain the Kaliwabo Inventory Windows installer from the project distributor.
+2. Run the installer.
+3. Complete the installation.
+4. Launch Kaliwabo Inventory.
+5. On first launch, choose the database location and create the initial administrator account.
+6. Sign in and configure the application.
+
+The application is designed for local operation. Normal inventory operations do not require a cloud account.
+
+---
+
+## Development Setup
+
+### Requirements
+
 - Windows
 - Python 3.11 or newer
 - Git
 
-Clone the repository:
+### Clone this repository
 
-    git clone https://github.com/P-Sudhakar-tech/offline_inventory_project.git
-    cd offline_inventory_project
+```powershell
+git clone https://github.com/Clark-kn/offline_inventory_project.git
+cd offline_inventory_project
+git checkout we-rich-release-2026-11-12
+```
 
-Create and activate a virtual environment:
+### Create a virtual environment
 
-    python -m venv .venv
-    .\.venv\Scripts\Activate.ps1
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
 
-Install dependencies:
+### Install dependencies
 
-    python -m pip install -r requirements.txt
+```powershell
+python -m pip install -r requirements.txt
+```
 
-Run the application:
+### Run the application
 
-    python main.py
+```powershell
+python main.py
+```
 
-Alternatively, use run_app.bat after installing dependencies.
+Alternatively, use `run_app.bat` after installing the dependencies.
 
-On first launch, choose the database location, create the administrator account and sign in.
+---
 
-## Running Tests
+## Automated Testing
 
-Run the complete automated test suite:
+Run the complete test suite:
 
-    .\.venv\Scripts\python.exe -m pytest -q
+```powershell
+.\.venv\Scripts\python.exe -m pytest -q
+```
 
-The test suite covers authentication, authorization, master data, purchases, sales, stock movements, damaged goods, purchase orders, reports, audit logging, migrations, backup and restore, application paths, timezone handling and application hardening.
+The suite covers authentication, authorization, master data, purchases, sales, stock movements, damaged goods, purchase orders, reports, audit logging, migrations, backup and restore, application paths, timezone handling and application hardening.
 
-The latest recorded full regression run for this release candidate completed with 265 passed. Run the tests again after making code changes.
+**Release validation:** The latest recorded full regression run for the Kaliwabo 1.0.0 release candidate completed with **267 tests passing**.
+
+This is a recorded validation result, not a guarantee that every future change will pass. Run the suite again after modifying the code.
+
+---
 
 ## Building the Windows Application
 
 Build the PyInstaller application folder:
 
-    .\.venv\Scripts\python.exe -m PyInstaller inventory_manager.spec --noconfirm
+```powershell
+.\.venv\Scripts\python.exe -m PyInstaller inventory_manager.spec --noconfirm
+```
 
-Output:
+Expected output:
 
-    dist\InventoryManager\InventoryManager.exe
+```text
+dist\InventoryManager\InventoryManager.exe
+```
 
-This is a packaged application folder, not a standalone one-file executable.
+The build produces an application folder with supporting files; it is not a standalone one-file executable.
 
-## Building the Inno Setup Installer
+### Building the installer
 
-Install Inno Setup 7, then compile the installer:
+Install Inno Setup 7 and compile the installer using its command-line compiler:
 
-    & "E:\Programs\Inno Setup 7\ISCC.exe" installer.iss
+```powershell
+ISCC.exe installer.iss
+```
 
-The installer output location is defined in installer.iss.
+If `ISCC.exe` is not available on your PATH, run it using its full installation path. For example:
+
+```powershell
+& "C:\Program Files (x86)\Inno Setup 7\ISCC.exe" installer.iss
+```
+
+The installer output directory and filename are configured in `installer.iss`.
+
+---
 
 ## Project Structure
 
-    app/
-    ├── backup/         Backup-related functionality
-    ├── config/         Application configuration and data paths
-    ├── data/           Database models, sessions and Alembic migrations
-    ├── domain/         Domain logic
-    ├── reports/        Report generation and export helpers
-    ├── security/       Permissions and authorization helpers
-    ├── services/       Business logic and application services
-    ├── setup/          Application self-installation support
-    ├── ui/             PySide6 windows, dialogs and tabs
-    ├── utils/          Shared utilities
-    └── viewmodels/     UI view models
+```text
+app/
+|-- backup/         Backup-related functionality
+|-- config/         Application configuration and data paths
+|-- data/           Database models, sessions and migrations
+|-- domain/         Domain logic
+|-- reports/        Report generation and export helpers
+|-- security/       Permissions and authorization helpers
+|-- services/       Business logic and application services
+|-- setup/          Application installation support
+|-- ui/             PySide6 windows, dialogs and tabs
+|-- utils/          Shared utilities
+`-- viewmodels/     UI view models
 
-    tests/              Automated pytest suite
-    resources/          Application resources and stylesheets
-    main.py             Application entry point
-    alembic.ini         Alembic configuration
-    inventory_manager.spec
-    installer.iss       Inno Setup installer definition
-    requirements.txt    Python dependencies
-    run_app.bat         Development launch helper
-## Data and Security Notes
+tests/              Automated test suite
+resources/          Application resources and stylesheets
+main.py             Application entry point
+alembic.ini         Alembic configuration
+inventory_manager.spec
+installer.iss       Inno Setup installer definition
+requirements.txt    Python dependencies
+run_app.bat         Development launch helper
+```
 
-- The application is designed for local use on a Windows computer.
-- Database, configuration and backup files are separate from the program installation.
-- Backups should periodically be copied to another safe location. A backup on the same physical drive does not protect against drive failure.
-- Application roles do not replace Windows account security or physical protection of the computer.
-- This is a desktop inventory application, not a multi-computer synchronized or cloud-hosted system.
+---
 
-## License
+## Scope and Security Notes
 
-MIT License. See LICENSE.
+- Designed for local use on a Windows computer.
+- Not a multi-computer synchronized or cloud-hosted inventory platform.
+- Application permissions do not replace Windows account security.
+- Backups should periodically be copied to a separate safe location.
+- A backup stored on the same physical drive does not protect against drive failure.
+- The software is provided under the terms of its MIT licence and without warranty.
+
+---
+
+## Licence
+
+This project retains the original **MIT License** and its copyright notice.
+
+See [LICENSE](LICENSE) for the complete licence text.
+
+The original author's attribution and licence terms must be preserved when redistributing the project or substantial portions of it.

@@ -1,6 +1,6 @@
 ; Inno Setup script for Kaliwabo Inventory.
 ;
-; Build with Inno Setup 6 (https://jrsoftware.org/isinfo.php):
+; Build with Inno Setup 7 (https://jrsoftware.org/isinfo.php):
 ;   1. Run:  pyinstaller inventory_manager.spec   (produces dist\InventoryManager\)
 ;   2. Open this file in Inno Setup, or run:  iscc installer.iss
 ;   3. The installer is written to installer_output\InventoryManagerSetup.exe
