@@ -1,4 +1,5 @@
 from datetime import datetime
+from app.utils.timezone import utc_now_naive
 from decimal import Decimal
 
 from sqlalchemy import ForeignKey, String
@@ -13,8 +14,9 @@ class Purchase(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     supplier_id: Mapped[int | None] = mapped_column(ForeignKey("suppliers.id"))
+    created_by_user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     reference: Mapped[str | None] = mapped_column(String(200))
-    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(default=utc_now_naive)
 
 
 class PurchaseItem(Base):
@@ -32,8 +34,9 @@ class Sale(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     customer_id: Mapped[int | None] = mapped_column(ForeignKey("customers.id"))
+    created_by_user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     reference: Mapped[str | None] = mapped_column(String(200))
-    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(default=utc_now_naive)
 
 
 class SaleItem(Base):
@@ -51,6 +54,7 @@ class StockAdjustment(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     product_id: Mapped[int] = mapped_column(ForeignKey("products.id"), nullable=False)
+    created_by_user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     quantity_delta: Mapped[Decimal] = mapped_column(SqliteDecimal, nullable=False)
     reason: Mapped[str] = mapped_column(String(400), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(default=utc_now_naive)

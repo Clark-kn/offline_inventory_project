@@ -16,10 +16,11 @@ from app.services.master_data import list_products
 class LineItemDialog(QDialog):
     """Pick a product and enter quantity/unit price for one purchase/sale line."""
 
-    def __init__(self, default_price_field: str = "price", parent=None):
+    def __init__(self, default_price_field: str = "price", parent=None, price_editable: bool = True):
         super().__init__(parent)
         self.setWindowTitle("Add Line Item")
         self._default_price_field = default_price_field
+        self._price_editable = price_editable
 
         self.product_combo = QComboBox()
         with new_session() as session:
@@ -30,6 +31,7 @@ class LineItemDialog(QDialog):
 
         self.quantity_edit = QLineEdit("1")
         self.price_edit = QLineEdit("0")
+        self.price_edit.setReadOnly(not self._price_editable)
 
         buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         buttons.accepted.connect(self._on_accept)
@@ -38,7 +40,8 @@ class LineItemDialog(QDialog):
         form = QFormLayout(self)
         form.addRow("Product", self.product_combo)
         form.addRow("Quantity", self.quantity_edit)
-        form.addRow("Unit price", self.price_edit)
+        price_label = "Unit price" if self._price_editable else "Selling price (fixed)"
+        form.addRow(price_label, self.price_edit)
         form.addRow(buttons)
 
         self._prefill_price()

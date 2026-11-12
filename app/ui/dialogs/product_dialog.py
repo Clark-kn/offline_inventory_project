@@ -15,15 +15,18 @@ from app.services.master_data import list_reference
 
 
 class ProductDialog(QDialog):
-    def __init__(self, product=None, parent=None):
+    def __init__(self, product=None, parent=None, price_editable=False):
         super().__init__(parent)
         self.is_edit = product is not None
+        self.price_editable = price_editable
         self.setWindowTitle("Edit Product" if self.is_edit else "Add Product")
 
         self.sku_edit = QLineEdit(product.sku if product else "")
         self.barcode_edit = QLineEdit(product.barcode if product and product.barcode else "")
         self.name_edit = QLineEdit(product.name if product else "")
-        self.price_edit = QLineEdit(str(product.price) if product else "0")
+        initial_price = str(product.price) if product else "0"
+        self.price_edit = QLineEdit(initial_price)
+        self.price_edit.setReadOnly(not self.price_editable)
         self.reorder_level_edit = QLineEdit(str(product.reorder_level) if product else "0")
         self.opening_stock_edit = QLineEdit("0")
 
@@ -55,7 +58,8 @@ class ProductDialog(QDialog):
         form.addRow("Category", self.category_combo)
         form.addRow("Unit", self.unit_combo)
         form.addRow("Location", self.location_combo)
-        form.addRow("Price", self.price_edit)
+        price_label = "Price" if self.price_editable else "Selling price (admin only)"
+        form.addRow(price_label, self.price_edit)
         form.addRow("Reorder level", self.reorder_level_edit)
         if not self.is_edit:
             form.addRow("Opening stock", self.opening_stock_edit)

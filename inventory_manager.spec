@@ -11,15 +11,22 @@
 
 import os
 
-from PyInstaller.utils.hooks import collect_submodules
+from PyInstaller.utils.hooks import collect_all, collect_submodules
 
 block_cipher = None
 
-datas = [
+# Bundle IANA timezone database files so ZoneInfo("Africa/Kigali")
+# works on Windows installations without system timezone data.
+tzdata_datas, tzdata_binaries, tzdata_hiddenimports = collect_all("tzdata")
+
+datas = list(tzdata_datas)
+binaries = list(tzdata_binaries)
+
+datas.extend([
     ("resources/style.qss", "resources"),
     ("app/data/migrations/env.py", "app/data/migrations"),
     ("app/data/migrations/script.py.mako", "app/data/migrations"),
-]
+])
 
 versions_dir = os.path.join("app", "data", "migrations", "versions")
 for filename in os.listdir(versions_dir):
@@ -29,9 +36,10 @@ for filename in os.listdir(versions_dir):
 a = Analysis(
     ["main.py"],
     pathex=[],
-    binaries=[],
+    binaries=binaries,
     datas=datas,
     hiddenimports=[
+        *tzdata_hiddenimports,
         "alembic",
         "sqlalchemy.dialects.sqlite",
         # Only imported inside app/data/migrations/env.py, which Alembic

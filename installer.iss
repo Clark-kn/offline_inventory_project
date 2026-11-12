@@ -21,19 +21,14 @@ AppId={{B6C6D9E1-6F2E-4B9A-9C7D-6B6F0B1B4A9E}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}
-DefaultDirName={autopf}\{#MyAppName}
+DefaultDirName={localappdata}\Programs\{#MyAppName}
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
-; Defaults to a per-user install (no admin prompt, installs under
-; %LocalAppData%\Programs, Start Menu shortcut and uninstall entry are
-; per-user) but still offers a "for all users" choice, which installs to
-; Program Files and HKLM like a traditional admin install. Either way the
-; installer registers a normal Windows uninstall entry (visible in
-; Settings > Apps / Control Panel > Programs and Features) and a Start
-; Menu shortcut (indexed by Windows Search) - {#MyAppName} shows up in
-; both regardless of which mode is chosen.
+; Per-user installation only. This matches the application's HKCU
+; uninstall registration and avoids admin elevation or machine-wide
+; installation. The app is installed under the current user's LocalAppData.
 PrivilegesRequired=lowest
-PrivilegesRequiredOverridesAllowed=dialog
+
 OutputDir=installer_output
 OutputBaseFilename=InventoryManagerSetup
 Compression=lzma

@@ -1,9 +1,34 @@
 .venv/
 __pycache__/
-*.pyc
+*.py[cod]
 *.db
 *.sqlite3
+
+# Generated builds and packaging
 build/
 dist/
+build_dropdown_fix/
+dist_dropdown_fix/
 installer_output/
+installer_test_output/
+installer_release_candidate_*/
+
+# Local backups and recovery copies
+backups/
+release_backups/
+patch_backups/
+viewer_restriction_backup_*/
+*.bak
+*.bak_*
+
+# Local test artifacts and reports
 .pytest_cache/
+regression_results_*.txt
+final_regression_*.txt
+full_regression_*.txt
+stock_movement.pdf
+stock_movement.xlsx
+
+# Local-only evaluation and installer test files
+EVALUATION-NOTES*.txt
+installer_test.iss

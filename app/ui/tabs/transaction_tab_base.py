@@ -14,8 +14,13 @@ from PySide6.QtWidgets import (
 )
 
 from app.data.session import new_session
+from app.security.permissions import PermissionDeniedError
 from app.services.stock_ledger import InsufficientStockError, ProductNotFoundError
-from app.services.transactions import EmptyTransactionError, InvalidLineItemError
+from app.services.transactions import (
+    EmptyTransactionError,
+    InvalidLineItemError,
+    SalePriceMismatchError,
+)
 from app.ui.dialogs.line_item_dialog import LineItemDialog
 
 
@@ -27,6 +32,7 @@ class TransactionTabBase(QWidget):
 
     party_label = "Party"
     price_field = "price"
+    price_editable = True
 
     def __init__(self, party_model, list_parties_fn, parent=None):
         super().__init__(parent)
@@ -76,7 +82,11 @@ class TransactionTabBase(QWidget):
         layout.addWidget(self.table)
 
     def _add_line(self):
-        dialog = LineItemDialog(default_price_field=self.price_field, parent=self)
+        dialog = LineItemDialog(
+            default_price_field=self.price_field,
+            parent=self,
+            price_editable=self.price_editable,
+        )
         if dialog.exec():
             product, qty, price = dialog.values()
             self._items.append((product, qty, price))
@@ -127,6 +137,12 @@ class TransactionTabBase(QWidget):
             with new_session() as session:
                 self.perform_save(session, party_id, reference, self._items)
                 session.commit()
+        except PermissionDeniedError as exc:
+            QMessageBox.warning(self, "Not allowed", str(exc))
+            return
+        except SalePriceMismatchError as exc:
+            QMessageBox.warning(self, "Selling price mismatch", str(exc))
+            return
         except InsufficientStockError as exc:
             QMessageBox.warning(self, "Insufficient stock", str(exc))
             return

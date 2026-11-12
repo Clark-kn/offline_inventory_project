@@ -15,8 +15,10 @@ from app.ui.tabs.adjustment_tab import AdjustmentTab
 from app.ui.tabs.audit_log_tab import AuditLogTab
 from app.ui.tabs.customer_tab import CustomerTab
 from app.ui.tabs.dashboard_tab import DashboardTab
+from app.ui.tabs.damaged_goods_tab import DamagedGoodsTab
 from app.ui.tabs.product_tab import ProductTab
 from app.ui.tabs.purchase_tab import PurchaseTab
+from app.ui.tabs.purchase_orders_tab import PurchaseOrdersTab
 from app.ui.tabs.reference_tab import ReferenceTab
 from app.ui.tabs.reports_tab import ReportsTab
 from app.ui.tabs.sale_tab import SaleTab
@@ -26,21 +28,24 @@ from app.ui.tabs.supplier_tab import SupplierTab
 from app.ui.tabs.user_management_tab import UserManagementTab
 
 ALL_ROLES = {"admin", "manager", "operator", "viewer"}
+OPERATIONAL_ROLES = {"admin", "manager", "operator"}
 
 # Each entry: (sidebar label with icon, page factory, roles allowed to see it)
 NAV_CATALOG = [
     ("📊  Dashboard", DashboardTab, ALL_ROLES),
-    ("📦  Products", ProductTab, {"admin", "manager", "operator"}),
+    ("📦  Products", ProductTab, ALL_ROLES),
     ("🏷️  Categories", lambda: ReferenceTab(Category, "Category"), {"admin", "manager"}),
     ("📐  Units", lambda: ReferenceTab(Unit, "Unit"), {"admin", "manager"}),
     ("📍  Locations", lambda: ReferenceTab(Location, "Location"), {"admin", "manager"}),
     ("🚚  Suppliers", SupplierTab, {"admin", "manager"}),
     ("🧑‍🤝‍🧑  Customers", CustomerTab, {"admin", "manager"}),
     ("🛒  Purchase / Stock In", PurchaseTab, {"admin", "manager", "operator"}),
+    ("📦  Purchase Orders", PurchaseOrdersTab, OPERATIONAL_ROLES),
     ("💵  Stock Out / Sale", SaleTab, {"admin", "manager", "operator"}),
     ("🛠️  Stock Adjustment", AdjustmentTab, {"admin", "manager", "operator"}),
-    ("📒  Stock Ledger", StockLedgerTab, ALL_ROLES),
-    ("📈  Reports", ReportsTab, ALL_ROLES),
+    ("📒  Stock Ledger", StockLedgerTab, OPERATIONAL_ROLES),
+    ("🧯  Damaged Goods", DamagedGoodsTab, OPERATIONAL_ROLES),
+    ("📈  Reports", ReportsTab, OPERATIONAL_ROLES),
     ("👤  Users", UserManagementTab, {"admin"}),
     ("🕵️  Audit Log", AuditLogTab, {"admin"}),
     ("⚙️  Application Settings", SettingsTab, {"admin"}),

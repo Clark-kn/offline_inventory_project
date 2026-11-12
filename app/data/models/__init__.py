@@ -1,3 +1,4 @@
+from app.data.models.damaged_good import DamagedGood
 from app.data.models.audit_log import AuditLog
 from app.data.models.base import Base
 from app.data.models.product import Product
@@ -14,6 +15,7 @@ from app.data.models.user import ROLES, User
 
 __all__ = [
     "Base",
+    "DamagedGood",
     "Product",
     "Category",
     "Customer",
@@ -29,4 +31,19 @@ __all__ = [
     "User",
     "ROLES",
     "AuditLog",
+    "PurchaseOrder",
+    "PurchaseOrderItem",
+    "PurchaseOrderReceipt",
+    "PurchaseOrderReceiptItem",
+    "PurchaseOrderClosure",
+    "PurchaseOrderClosureItem",
 ]
+
+from app.data.models.purchase_orders import (
+    PurchaseOrder,
+    PurchaseOrderItem,
+    PurchaseOrderReceipt,
+    PurchaseOrderReceiptItem,
+    PurchaseOrderClosure,
+    PurchaseOrderClosureItem,
+)

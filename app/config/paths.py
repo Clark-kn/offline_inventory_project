@@ -1,4 +1,4 @@
-import os
+﻿import os
 from pathlib import Path
 
 from app.config import app_config
@@ -8,13 +8,14 @@ APP_NAME = "Inventory"
 
 
 def default_data_dir() -> Path:
-    """The suggested default storage folder, offered on first run.
+    """The recommended per-user storage folder.
 
-    Kept outside the install directory (ProgramData) so upgrades/reinstalls
-    of the application never touch operational data. The admin may choose a
-    different folder instead (see app_config.set_database_dir).
+    The database stays outside the installation directory so application
+    upgrades and reinstalls do not touch operational data. LOCALAPPDATA is
+    writable by the installing Windows user without administrator rights.
+    The admin may choose a different folder during first-run setup.
     """
-    base = os.environ.get("PROGRAMDATA", str(Path.home()))
+    base = os.environ.get("LOCALAPPDATA", str(Path.home()))
     return Path(base) / APP_VENDOR / APP_NAME
 
 

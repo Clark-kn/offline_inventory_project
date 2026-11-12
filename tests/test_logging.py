@@ -46,6 +46,28 @@ def test_configure_logging_creates_log_file_and_writes(isolated_data_dir):
     assert "hello from test" in log_path.read_text(encoding="utf-8")
 
 
+
+def test_configure_logging_replaces_previous_file_handler(isolated_data_dir):
+    configure_logging()
+    configure_logging()
+
+    logger.info("single logging entry")
+
+    root = logging.getLogger()
+    for handler in root.handlers:
+        handler.flush()
+
+    owned_handlers = [
+        handler for handler in root.handlers
+        if getattr(handler, "_offline_inventory_file_handler", False)
+    ]
+
+    log_path = isolated_data_dir / "logs" / "app.log"
+    contents = log_path.read_text(encoding="utf-8")
+
+    assert len(owned_handlers) == 1
+    assert contents.count("single logging entry") == 1
+
 def test_install_excepthook_sets_a_callable(isolated_data_dir):
     import sys
 

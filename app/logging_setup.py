@@ -17,6 +17,14 @@ logger = logging.getLogger("app")
 
 
 def configure_logging() -> None:
+    root = logging.getLogger()
+
+    # Replace our previous file handler instead of accumulating handlers.
+    for existing_handler in tuple(root.handlers):
+        if getattr(existing_handler, "_offline_inventory_file_handler", False):
+            root.removeHandler(existing_handler)
+            existing_handler.close()
+
     log_path = log_dir() / _LOG_FILE_NAME
     handler = logging.handlers.RotatingFileHandler(
         log_path, maxBytes=_MAX_BYTES, backupCount=_BACKUP_COUNT, encoding="utf-8"
@@ -24,7 +32,8 @@ def configure_logging() -> None:
     handler.setFormatter(
         logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
     )
-    root = logging.getLogger()
+    handler._offline_inventory_file_handler = True
+
     root.setLevel(logging.INFO)
     root.addHandler(handler)
 

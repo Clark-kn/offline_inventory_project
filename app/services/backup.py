@@ -1,7 +1,10 @@
-import shutil
+﻿import shutil
 import sqlite3
-from datetime import date, datetime
+from datetime import datetime
 from pathlib import Path
+
+from app.utils.timezone import KIGALI_TIMEZONE, kigali_now
+from app.security.permissions import require_admin
 
 BACKUP_PREFIX = "inventory_backup_"
 BACKUP_SUFFIX = ".db"
@@ -17,14 +20,12 @@ class RestoreError(Exception):
 
 
 def _timestamp_name() -> str:
-    return datetime.now().strftime("%Y%m%d_%H%M%S")
+    return kigali_now().strftime("%Y%m%d_%H%M%S")
 
 
 def create_backup(db_path: Path, backup_dir: Path) -> Path:
-    """Copies the live database to backup_dir using SQLite's online backup
-    API, which is safe to run even while the app holds the database open
-    (unlike a plain file copy, it won't grab a half-written page).
-    """
+    require_admin()
+
     db_path = Path(db_path)
     backup_dir = Path(backup_dir)
     backup_dir.mkdir(parents=True, exist_ok=True)
@@ -48,6 +49,8 @@ def create_backup(db_path: Path, backup_dir: Path) -> Path:
 
 
 def list_backups(backup_dir: Path) -> list[Path]:
+    require_admin()
+
     backup_dir = Path(backup_dir)
     if not backup_dir.exists():
         return []
@@ -59,8 +62,8 @@ def list_backups(backup_dir: Path) -> list[Path]:
 
 
 def prune_backups(backup_dir: Path, keep: int = DEFAULT_RETENTION) -> list[Path]:
-    """Deletes the oldest backups beyond the retention count. Returns the
-    list of files that were removed."""
+    require_admin()
+
     backups = list_backups(backup_dir)
     to_remove = backups[keep:]
     for path in to_remove:
@@ -69,15 +72,24 @@ def prune_backups(backup_dir: Path, keep: int = DEFAULT_RETENTION) -> list[Path]
 
 
 def has_backup_today(backup_dir: Path) -> bool:
-    today = date.today()
+    require_admin()
+
+    today = kigali_now().date()
     for path in list_backups(backup_dir):
-        if datetime.fromtimestamp(path.stat().st_mtime).date() == today:
+        backup_date = datetime.fromtimestamp(
+            path.stat().st_mtime, tz=KIGALI_TIMEZONE
+        ).date()
+        if backup_date == today:
             return True
     return False
 
 
 def verify_backup_integrity(backup_path: Path) -> bool:
-    conn = sqlite3.connect(str(backup_path))
+    try:
+        conn = sqlite3.connect(str(backup_path))
+    except sqlite3.DatabaseError:
+        return False
+
     try:
         result = conn.execute("PRAGMA integrity_check").fetchone()
         return result is not None and result[0] == "ok"
@@ -88,13 +100,8 @@ def verify_backup_integrity(backup_path: Path) -> bool:
 
 
 def restore_backup(backup_path: Path, db_path: Path) -> None:
-    """Verifies the backup file, then overwrites db_path with it.
+    require_admin()
 
-    The running app must be restarted afterwards: an open SQLAlchemy engine
-    may hold connections/locks on the current file, and other screens have
-    live data loaded from it, so a live hot-swap is not attempted here -
-    the same restart-required approach used for changing the DB location.
-    """
     backup_path = Path(backup_path)
     db_path = Path(db_path)
 

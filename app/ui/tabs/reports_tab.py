@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
 )
 
 from app.data.session import new_session
+from app.utils.timezone import format_kigali
 from app.reports.excel_export import write_table_excel
 from app.reports.pdf_export import write_table_pdf
 from app.services.reports import (
@@ -128,7 +129,7 @@ class ReportsTab(QWidget):
 
         rows = [
             [
-                txn.created_at.strftime("%Y-%m-%d %H:%M"),
+                format_kigali(txn.created_at),
                 product.sku,
                 product.name,
                 txn.reason,

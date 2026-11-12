@@ -188,6 +188,35 @@ QComboBox::drop-down {
     width: 22px;
 }
 
+
+/* ---------- Dropdown popup contrast ---------- */
+
+QComboBox QAbstractItemView {
+    background-color: #ffffff;
+    color: #1e293b;
+    border: 1px solid #cbd5e1;
+    selection-background-color: #4f46e5;
+    selection-color: #ffffff;
+    outline: 0;
+}
+
+QComboBox QAbstractItemView::item {
+    background-color: #ffffff;
+    color: #1e293b;
+    padding: 6px 10px;
+    min-height: 22px;
+}
+
+QComboBox QAbstractItemView::item:hover {
+    background-color: #eef2ff;
+    color: #1e293b;
+}
+
+QComboBox QAbstractItemView::item:selected {
+    background-color: #4f46e5;
+    color: #ffffff;
+}
+
 /* ---------- Tables ---------- */
 
 QTableWidget {
@@ -241,4 +270,70 @@ QScrollBar::handle:vertical {
 
 QScrollBar::handle:vertical:hover {
     background: #94a3b8;
+}
+
+
+/* ---------- Damaged Goods control readability ---------- */
+
+QComboBox#DamagedGoodsUnitCombo,
+QComboBox#DamagedGoodsSupplierCombo,
+QDateEdit#DamagedGoodsDateEdit {
+    background-color: #ffffff;
+    color: #1e293b;
+    border: 1px solid #94a3b8;
+    border-radius: 6px;
+    padding: 7px 10px;
+    min-height: 22px;
+    selection-background-color: #4f46e5;
+    selection-color: #ffffff;
+}
+
+QComboBox#DamagedGoodsUnitCombo:focus,
+QComboBox#DamagedGoodsSupplierCombo:focus,
+QDateEdit#DamagedGoodsDateEdit:focus {
+    border: 1px solid #4f46e5;
+}
+
+/* Calendar popup */
+QCalendarWidget#DamagedGoodsCalendar {
+    background-color: #ffffff;
+    color: #1e293b;
+    border: 1px solid #cbd5e1;
+}
+
+QCalendarWidget#DamagedGoodsCalendar QToolButton {
+    background-color: #f8fafc;
+    color: #1e293b;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    padding: 5px;
+    min-height: 24px;
+}
+
+QCalendarWidget#DamagedGoodsCalendar QToolButton:hover {
+    background-color: #eef2ff;
+    color: #3730a3;
+}
+
+QCalendarWidget#DamagedGoodsCalendar QSpinBox {
+    background-color: #ffffff;
+    color: #1e293b;
+    border: 1px solid #cbd5e1;
+    padding: 3px;
+}
+
+QCalendarWidget#DamagedGoodsCalendar QAbstractItemView {
+    background-color: #ffffff;
+    color: #1e293b;
+    selection-background-color: #4f46e5;
+    selection-color: #ffffff;
+    outline: 0;
+}
+
+QCalendarWidget#DamagedGoodsCalendar QAbstractItemView:enabled {
+    color: #1e293b;
+}
+
+QCalendarWidget#DamagedGoodsCalendar QAbstractItemView:disabled {
+    color: #94a3b8;
 }

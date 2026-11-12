@@ -6,6 +6,8 @@ from sqlalchemy.orm import Session
 
 from app.data.models import ROLES, User
 from app.services.audit import log_action
+from app.security.permissions import PermissionDeniedError, require_admin
+from app.security.session_context import get_current_user
 
 PBKDF2_ITERATIONS = 200_000
 
@@ -32,8 +34,19 @@ def has_any_user(session: Session) -> bool:
 
 def create_user(session: Session, username: str, password: str, role: str) -> User:
     username = username.strip()
+
     if role not in ROLES:
         raise InvalidRoleError(f"Invalid role: {role}")
+
+    # Bootstrap is allowed only while the database has no users.
+    # The first account must be an administrator.
+    if not has_any_user(session):
+        if get_current_user() is not None or role != "admin":
+            raise PermissionDeniedError(
+                "The first account must be an administrator created during initial setup."
+            )
+    else:
+        require_admin()
     existing = session.scalar(select(User).where(User.username == username))
     if existing is not None:
         raise DuplicateUsernameError(f"Username '{username}' already exists")
@@ -72,16 +85,23 @@ def authenticate(session: Session, username: str, password: str) -> User:
         session.commit()
         raise InvalidCredentialsError("Invalid username or password")
 
-    log_action(session, "login_success", f"username={username}")
+    log_action(session, "login_success", f"username={username}", actor_user_id=user.id)
     session.commit()
     return user
 
 
 def list_users(session: Session):
+    require_admin()
     return session.scalars(select(User).order_by(User.username)).all()
 
 
 def set_user_active(session: Session, user_id: int, is_active: bool) -> User:
+    require_admin()
+
+    current = get_current_user()
+    if current is not None and current.id == user_id and not is_active:
+        raise PermissionDeniedError("You cannot deactivate your own account.")
+
     user = session.get(User, user_id)
     user.is_active = is_active
     log_action(session, "user_status_changed", f"user_id={user_id} is_active={is_active}")
@@ -90,8 +110,13 @@ def set_user_active(session: Session, user_id: int, is_active: bool) -> User:
 
 
 def change_role(session: Session, user_id: int, role: str) -> User:
+    require_admin()
     if role not in ROLES:
         raise InvalidRoleError(f"Invalid role: {role}")
+    current = get_current_user()
+    if current is not None and current.id == user_id and role != current.role:
+        raise PermissionDeniedError("You cannot change your own role while logged in.")
+
     user = session.get(User, user_id)
     user.role = role
     log_action(session, "user_role_changed", f"user_id={user_id} role={role}")
@@ -100,6 +125,7 @@ def change_role(session: Session, user_id: int, role: str) -> User:
 
 
 def change_password(session: Session, user_id: int, new_password: str) -> User:
+    require_admin()
     user = session.get(User, user_id)
     salt = secrets.token_bytes(16)
     user.password_hash = _hash_password(new_password, salt)

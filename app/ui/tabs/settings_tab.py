@@ -18,6 +18,7 @@ from PySide6.QtWidgets import (
 )
 
 from app.config import app_config
+from app.utils.timezone import KIGALI_TIMEZONE
 from app.config.paths import backup_dir, database_path
 from app.services.backup import (
     BackupError,
@@ -191,7 +192,7 @@ class SettingsTab(QWidget):
         self._backups = list_backups(backup_dir())
         self.backups_table.setRowCount(len(self._backups))
         for i, path in enumerate(self._backups):
-            mtime = datetime.fromtimestamp(path.stat().st_mtime).strftime("%Y-%m-%d %H:%M:%S")
+            mtime = datetime.fromtimestamp(path.stat().st_mtime, tz=KIGALI_TIMEZONE).strftime("%Y-%m-%d %H:%M:%S")
             self.backups_table.setItem(i, 0, QTableWidgetItem(f"{path.name}  ({mtime})"))
             self.backups_table.setItem(i, 1, QTableWidgetItem(_format_size(path.stat().st_size)))
 

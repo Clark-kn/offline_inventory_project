@@ -1,4 +1,5 @@
 from datetime import datetime
+from app.utils.timezone import utc_now_naive
 
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column
@@ -13,4 +14,4 @@ class AuditLog(Base):
     user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
     action: Mapped[str] = mapped_column(String(100), nullable=False)
     details: Mapped[str | None] = mapped_column(String(500))
-    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(default=utc_now_naive)

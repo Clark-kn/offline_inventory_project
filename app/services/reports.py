@@ -6,6 +6,8 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.data.models import Product, StockTransaction
+from app.security.permissions import require_authenticated
+from app.services.damaged_goods import damaged_goods_totals
 
 
 @dataclass
@@ -14,9 +16,12 @@ class DashboardSummary:
     total_stock_value: Decimal
     low_stock_count: int
     out_of_stock_count: int
+    damaged_bottles: Decimal
+    damaged_crates: Decimal
 
 
 def dashboard_summary(session: Session) -> DashboardSummary:
+    require_authenticated()
     products = session.scalars(select(Product).where(Product.is_active.is_(True))).all()
 
     total_value = sum((p.current_stock * p.price for p in products), Decimal("0"))
@@ -28,10 +33,13 @@ def dashboard_summary(session: Session) -> DashboardSummary:
         total_stock_value=total_value,
         low_stock_count=low_stock,
         out_of_stock_count=out_of_stock,
+        damaged_bottles=damaged_goods_totals(session)["bottles"],
+        damaged_crates=damaged_goods_totals(session)["crates"],
     )
 
 
 def recent_transactions(session: Session, limit: int = 10):
+    require_authenticated()
     stmt = (
         select(StockTransaction, Product)
         .join(Product, Product.id == StockTransaction.product_id)
@@ -42,21 +50,25 @@ def recent_transactions(session: Session, limit: int = 10):
 
 
 def current_stock_report(session: Session):
+    require_authenticated()
     stmt = select(Product).where(Product.is_active.is_(True)).order_by(Product.name)
     return session.scalars(stmt).all()
 
 
 def low_stock_report(session: Session):
+    require_authenticated()
     products = current_stock_report(session)
     return [p for p in products if 0 < p.current_stock <= p.reorder_level]
 
 
 def out_of_stock_report(session: Session):
+    require_authenticated()
     products = current_stock_report(session)
     return [p for p in products if p.current_stock <= 0]
 
 
 def product_ledger(session: Session, product_id: int):
+    require_authenticated()
     stmt = (
         select(StockTransaction)
         .where(StockTransaction.product_id == product_id)
@@ -66,6 +78,7 @@ def product_ledger(session: Session, product_id: int):
 
 
 def stock_movement_report(session: Session, start: datetime, end: datetime):
+    require_authenticated()
     stmt = (
         select(StockTransaction, Product)
         .join(Product, Product.id == StockTransaction.product_id)

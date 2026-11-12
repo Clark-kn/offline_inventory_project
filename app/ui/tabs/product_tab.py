@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
 )
 
 from app.data.session import new_session
+from app.security.permissions import PermissionDeniedError, current_role
 from app.services.master_data import (
     DuplicateSkuError,
     InvalidProductDataError,
@@ -30,6 +31,7 @@ class ProductTab(QWidget):
         self.setObjectName("Card")
 
         self.show_inactive = QCheckBox("Show inactive products")
+        self.show_inactive.setVisible(current_role() != "viewer")
         self.show_inactive.stateChanged.connect(self.refresh)
 
         self.table = QTableWidget(0, len(COLUMNS))
@@ -40,9 +42,12 @@ class ProductTab(QWidget):
         self.table.setAlternatingRowColors(True)
 
         add_btn = QPushButton("Add")
+        add_btn.setVisible(current_role() != "viewer")
         add_btn.setObjectName("PrimaryButton")
         edit_btn = QPushButton("Edit")
+        edit_btn.setVisible(current_role() in {"admin", "manager"})
         self.toggle_btn = QPushButton("Deactivate")
+        self.toggle_btn.setVisible(current_role() == "admin")
         add_btn.clicked.connect(self._add)
         edit_btn.clicked.connect(self._edit)
         self.toggle_btn.clicked.connect(self._toggle_active)
@@ -64,7 +69,10 @@ class ProductTab(QWidget):
 
     def refresh(self):
         with new_session() as session:
-            rows = list_products(session, include_inactive=self.show_inactive.isChecked())
+            include_inactive = (
+                current_role() != "viewer" and self.show_inactive.isChecked()
+            )
+            rows = list_products(session, include_inactive=include_inactive)
             self.table.setRowCount(len(rows))
             self._ids = []
             for i, row in enumerate(rows):
@@ -83,13 +91,18 @@ class ProductTab(QWidget):
         return self._ids[row]
 
     def _add(self):
-        dialog = ProductDialog(parent=self)
+        dialog = ProductDialog(
+            parent=self,
+            price_editable=current_role() == "admin",
+        )
         if dialog.exec():
             values = dialog.values()
             with new_session() as session:
                 try:
                     create_product(session, **values)
                     session.commit()
+                except PermissionDeniedError as exc:
+                    QMessageBox.warning(self, "Permission denied", str(exc))
                 except DuplicateSkuError as exc:
                     QMessageBox.warning(self, "Duplicate SKU", str(exc))
                 except InvalidProductDataError as exc:
@@ -106,7 +119,11 @@ class ProductTab(QWidget):
             from app.data.models import Product
 
             product = session.get(Product, product_id)
-            dialog = ProductDialog(product=product, parent=self)
+            dialog = ProductDialog(
+                product=product,
+                parent=self,
+                price_editable=current_role() == "admin",
+            )
         if dialog.exec():
             values = dialog.values()
             values.pop("opening_stock", None)
@@ -114,6 +131,8 @@ class ProductTab(QWidget):
                 try:
                     update_product(session, product_id, **values)
                     session.commit()
+                except PermissionDeniedError as exc:
+                    QMessageBox.warning(self, "Permission denied", str(exc))
                 except DuplicateSkuError as exc:
                     QMessageBox.warning(self, "Duplicate SKU", str(exc))
                 except InvalidProductDataError as exc:
@@ -126,7 +145,11 @@ class ProductTab(QWidget):
             QMessageBox.information(self, "No selection", "Select a product to activate/deactivate.")
             return
         product_id, is_active = selected
-        with new_session() as session:
-            set_product_active(session, product_id, not is_active)
-            session.commit()
+        try:
+            with new_session() as session:
+                set_product_active(session, product_id, not is_active)
+                session.commit()
+        except PermissionDeniedError as exc:
+            QMessageBox.warning(self, "Permission denied", str(exc))
+            return
         self.refresh()

@@ -5,6 +5,8 @@ import pytest
 
 from app.data.db import create_db_engine, init_db, make_session_factory
 from app.data.models import Product, StockTransaction
+from app.security.session_context import set_current_user
+from app.services.auth import create_user
 from app.services.master_data import (
     InvalidProductDataError,
     create_product,
@@ -26,7 +28,11 @@ def session():
     init_db(engine)
     factory = make_session_factory(engine)
     with factory() as s:
+        admin = create_user(s, "admin", "test-password-123", role="admin")
+        s.commit()
+        set_current_user(admin)
         yield s
+        set_current_user(None)
 
 
 # --- boundary: invalid data --------------------------------------------

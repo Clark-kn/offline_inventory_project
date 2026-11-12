@@ -1,18 +1,16 @@
-import logging
 import sys
 from pathlib import Path
 
 from PySide6.QtWidgets import QApplication, QDialog, QMessageBox
 
 from app.config import app_config
-from app.config.paths import backup_dir, database_path
+from app.config.paths import database_path
 from app.data.migrate import MigrationError, run_migrations
 from app.data.session import new_session
 from app.logging_setup import configure_logging, install_excepthook
 from app.security.session_context import set_current_user
-from app.services.audit import log_action
 from app.services.auth import has_any_user
-from app.services.backup import BackupError, create_backup, has_backup_today, prune_backups
+from app.services.startup_backup import run_auto_backup_if_needed
 from app.setup.self_install import (
     UNINSTALL_FLAG,
     is_frozen,
@@ -75,23 +73,6 @@ def sign_in():
     return login_dialog.authenticated_user
 
 
-def run_auto_backup_if_needed() -> None:
-    """Takes one backup per calendar day, on whichever session happens to be
-    the first to sign in that day. Best-effort: a failure here must never
-    block the user from getting into the app.
-    """
-    try:
-        if has_backup_today(backup_dir()):
-            return
-        create_backup(database_path(), backup_dir())
-        prune_backups(backup_dir(), keep=app_config.get_backup_retention())
-        with new_session() as session:
-            log_action(session, "auto_backup", "Daily automatic backup")
-            session.commit()
-    except BackupError as exc:
-        logging.getLogger("app").warning("Automatic backup failed: %s", exc)
-
-
 def main():
     # Only meaningful for the packaged exe: in dev mode (python main.py)
     # there is nothing to install. Handled before QApplication exists so
@@ -126,7 +107,7 @@ def main():
             sys.exit(0)
 
         set_current_user(user)
-        run_auto_backup_if_needed()
+        run_auto_backup_if_needed(user)
         window = MainWindow(user)
         window.show()
         app.exec()

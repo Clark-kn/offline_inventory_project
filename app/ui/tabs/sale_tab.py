@@ -7,6 +7,7 @@ from app.ui.tabs.transaction_tab_base import TransactionTabBase
 class SaleTab(TransactionTabBase):
     party_label = "Customer"
     price_field = "price"
+    price_editable = False
 
     def __init__(self, parent=None):
         super().__init__(Customer, list_customers, parent)

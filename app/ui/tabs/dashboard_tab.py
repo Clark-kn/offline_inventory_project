@@ -9,6 +9,7 @@ from PySide6.QtWidgets import (
 )
 
 from app.data.session import new_session
+from app.utils.timezone import format_kigali
 from app.services.reports import dashboard_summary, recent_transactions
 from app.ui.widgets.kpi_card import KpiCard
 
@@ -22,6 +23,8 @@ class DashboardTab(QWidget):
         self.stock_value_card = KpiCard("Total Stock Value")
         self.low_stock_card = KpiCard("Low Stock Items", value_object_name="KpiValueWarning")
         self.out_of_stock_card = KpiCard("Out of Stock Items", value_object_name="KpiValueDanger")
+        self.damaged_bottles_card = KpiCard("Damaged Bottles")
+        self.damaged_crates_card = KpiCard("Damaged Crates")
 
         kpi_row = QHBoxLayout()
         kpi_row.setSpacing(16)
@@ -30,6 +33,8 @@ class DashboardTab(QWidget):
             self.stock_value_card,
             self.low_stock_card,
             self.out_of_stock_card,
+            self.damaged_bottles_card,
+            self.damaged_crates_card,
         ):
             kpi_row.addWidget(card)
 
@@ -66,11 +71,13 @@ class DashboardTab(QWidget):
             self.stock_value_card.set_value(f"{summary.total_stock_value:,.2f}")
             self.low_stock_card.set_value(str(summary.low_stock_count))
             self.out_of_stock_card.set_value(str(summary.out_of_stock_count))
+            self.damaged_bottles_card.set_value(str(summary.damaged_bottles))
+            self.damaged_crates_card.set_value(str(summary.damaged_crates))
 
             rows = recent_transactions(session, limit=15)
             self.table.setRowCount(len(rows))
             for i, (txn, product) in enumerate(rows):
-                self.table.setItem(i, 0, QTableWidgetItem(txn.created_at.strftime("%Y-%m-%d %H:%M")))
+                self.table.setItem(i, 0, QTableWidgetItem(format_kigali(txn.created_at)))
                 self.table.setItem(i, 1, QTableWidgetItem(f"{product.sku} — {product.name}"))
                 self.table.setItem(i, 2, QTableWidgetItem(txn.reason))
                 self.table.setItem(i, 3, QTableWidgetItem(str(txn.qty_delta)))
