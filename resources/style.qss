@@ -1,4 +1,4 @@
-/* Modern admin-dashboard style for the Offline Inventory Management System.
+/* Kaliwabo Inventory - modern offline inventory management interface.
    Palette: dark slate sidebar, indigo accent, light content area, white cards. */
 
 * {
@@ -19,9 +19,16 @@ QWidget#Sidebar {
 
 QLabel#BrandLabel {
     color: #ffffff;
-    font-size: 16px;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+QLabel#BrandSubtitle {
+    color: #aeb9cc;
+    font-size: 9px;
     font-weight: 600;
-    padding: 22px 20px 18px 20px;
+    letter-spacing: 2px;
 }
 
 QListWidget#NavList {

@@ -1,4 +1,4 @@
-; Inno Setup script for the Offline Inventory Management System.
+; Inno Setup script for Kaliwabo Inventory.
 ;
 ; Build with Inno Setup 6 (https://jrsoftware.org/isinfo.php):
 ;   1. Run:  pyinstaller inventory_manager.spec   (produces dist\InventoryManager\)
@@ -11,9 +11,10 @@
 ; directory precisely so upgrades and reinstalls never touch operational
 ; data (see app/config/paths.py and app/config/app_config.py).
 
-#define MyAppName "Offline Inventory Management System"
+#define MyAppName "Kaliwabo Inventory"
 #define MyAppVersion "1.0.0"
-#define MyAppPublisher "Offline Inventory"
+#define MyAppPublisher "Kaliwabo Software Studio"
+#define MyAppInstallDir "Offline Inventory Management System"
 #define MyAppExeName "InventoryManager.exe"
 
 [Setup]
@@ -21,7 +22,7 @@ AppId={{B6C6D9E1-6F2E-4B9A-9C7D-6B6F0B1B4A9E}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}
-DefaultDirName={localappdata}\Programs\{#MyAppName}
+DefaultDirName={localappdata}\Programs\{#MyAppInstallDir}
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
 ; Per-user installation only. This matches the application's HKCU

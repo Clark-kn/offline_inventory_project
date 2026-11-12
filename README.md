@@ -1,6 +1,8 @@
-# WE+RICH Offline Inventory Management System
+# Kaliwabo Inventory
 
-A Windows desktop inventory management application designed for local, offline operation. It uses a local SQLite database and does not require a cloud account or hosted database for normal inventory operations.
+**Kaliwabo Software Studio**
+
+An offline Windows desktop inventory management system for tracking products, purchasing, sales, stock movements, damaged goods and reports. It uses a local SQLite database and does not require a cloud account or hosted database for normal inventory operations.
 
 Built with Python 3.11+, PySide6, SQLAlchemy, SQLite, Alembic, ReportLab, openpyxl and PyInstaller.
 

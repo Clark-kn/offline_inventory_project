@@ -57,7 +57,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.current_user = current_user
         self.logout_requested = False
-        self.setWindowTitle("Offline Inventory Management System")
+        self.setWindowTitle("Kaliwabo Inventory")
         self.resize(1240, 780)
 
         self.nav_labels = []
@@ -85,8 +85,20 @@ class MainWindow(QMainWindow):
         sidebar.setObjectName("Sidebar")
         sidebar.setFixedWidth(250)
 
-        brand = QLabel("Inventory Manager")
+        brand_block = QWidget()
+        brand_block.setObjectName("BrandBlock")
+
+        brand = QLabel("KALIWABO")
         brand.setObjectName("BrandLabel")
+
+        brand_subtitle = QLabel("SOFTWARE STUDIO")
+        brand_subtitle.setObjectName("BrandSubtitle")
+
+        brand_layout = QVBoxLayout(brand_block)
+        brand_layout.setContentsMargins(20, 22, 20, 18)
+        brand_layout.setSpacing(3)
+        brand_layout.addWidget(brand)
+        brand_layout.addWidget(brand_subtitle)
 
         self.nav_list = QListWidget()
         self.nav_list.setObjectName("NavList")
@@ -96,7 +108,7 @@ class MainWindow(QMainWindow):
         layout = QVBoxLayout(sidebar)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
-        layout.addWidget(brand)
+        layout.addWidget(brand_block)
         layout.addWidget(self.nav_list, stretch=1)
 
         return sidebar

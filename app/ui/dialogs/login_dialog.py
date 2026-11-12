@@ -19,7 +19,7 @@ class LoginDialog(QDialog):
         self.setMinimumWidth(340)
         self.authenticated_user = None
 
-        title = QLabel("Offline Inventory Management")
+        title = QLabel("Kaliwabo Inventory")
         title.setObjectName("PageTitle")
         title.setWordWrap(True)
         title.setAlignment(Qt.AlignCenter)

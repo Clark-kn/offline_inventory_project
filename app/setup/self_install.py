@@ -43,10 +43,14 @@ def _log_exception(context: str) -> None:
     except OSError:
         pass  # logging is best-effort; must never itself crash startup
 
-APP_NAME = "Offline Inventory Management System"
-APP_PUBLISHER = "Offline Inventory"
+APP_NAME = "Kaliwabo Inventory"
+APP_PUBLISHER = "Kaliwabo Software Studio"
 APP_VERSION = "1.0.0"
 EXE_NAME = "InventoryManager.exe"
+
+# Keep this folder name stable so branding changes do not create a
+# second installation or break upgrades of existing installations.
+INSTALL_DIR_NAME = "Offline Inventory Management System"
 
 # Matches installer.iss's AppId, so a machine that has used either the
 # Inno Setup installer or this self-install path (or both, over time)
@@ -63,7 +67,7 @@ def install_dir() -> Path:
     import os
 
     base = os.environ.get("LOCALAPPDATA", str(Path.home()))
-    return Path(base) / "Programs" / APP_NAME
+    return Path(base) / "Programs" / INSTALL_DIR_NAME
 
 
 def _current_app_dir() -> Path:
@@ -122,7 +126,9 @@ $shortcut.Save()
 
 
 def _remove_start_menu_shortcut() -> None:
-    (_start_menu_programs_dir() / f"{APP_NAME}.lnk").unlink(missing_ok=True)
+    start_menu = _start_menu_programs_dir()
+    (start_menu / f"{APP_NAME}.lnk").unlink(missing_ok=True)
+    (start_menu / "Offline Inventory Management System.lnk").unlink(missing_ok=True)
 
 
 def _register_uninstall_entry(installed_exe: Path, key_path: str = UNINSTALL_KEY) -> None:

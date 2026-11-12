@@ -1,4 +1,4 @@
-# PyInstaller spec for the Offline Inventory Management System.
+# PyInstaller spec for Kaliwabo Inventory.
 #
 # Build with:  pyinstaller inventory_manager.spec
 #
